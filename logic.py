@@ -1,5 +1,4 @@
 import pygame
-from possible_moves import check_castle
 
 def draw_board(screen):
     for y in range(8):
@@ -30,6 +29,31 @@ def check_promotion(board):
     return False, None
 
 
+def check_castle(king_square, color, board, pieces):
+    castle_king = False
+    castle_queen = False
+    o = 0 if color else 1
+    if pieces[king_square].moved:
+        return False, False
+    for side in range(2):
+        if side == 0:
+            if board[king_square + 3] == 16 + o:
+                castle_king = True
+            for x in range(1, 3):
+                if board[king_square + x] != 0:
+                    castle_king = False
+                    break
+        else:
+            if board[king_square - 4] == 16 + o:
+                castle_queen = True
+            for x in range(1, 4):
+                if board[king_square - x] != 0:
+                    castle_queen = False
+                    break
+                
+    return castle_king, castle_queen
+
+
 def select_square(square, poss_moves, pos_board, screen, k_w, pieces, board):
     if square == k_w:
         ck, cq = check_castle(k_w, True, board, pieces)
@@ -51,9 +75,23 @@ def select_square(square, poss_moves, pos_board, screen, k_w, pieces, board):
         pygame.draw.rect(screen, "red", (pos_board[space][0], pos_board[space][1], 100, 100), 5)
     pygame.draw.rect(screen, "red", (pos_board[square][0], pos_board[square][1], 100, 100), 5)
     return True
-    
+
+def check_check(possible_enemy, king_square):
+    for space in possible_enemy:
+        for move in possible_enemy[space]:
+            if move == king_square:
+                return True
+    return False
 
     
 def render_pieces(pieces):
     for piece in pieces:
         pieces[piece].render()
+        
+def play_move(move, board):
+    board[move[1]] = board[move[0]]
+    board[move[0]] = 0
+    
+def unplay_move(move, board):
+    board[move[0]] = board[move[1]]
+    board[move[1]] = 0

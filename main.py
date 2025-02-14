@@ -5,7 +5,7 @@ from fen_read import read_Fen
 from piece_board import piece_board
 from possible_moves import poss_moves, castle, check_castle
 
-fen = "rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR"
+fen = "rnbqkbnr/8/8/8/8/8/4R3/RNBKQBNR"
 clicked = False
 turn = 0
 selected = None
@@ -99,6 +99,7 @@ while True:
                 square = posx + posy * 8
                 # print(square)
                 selected, clicked = handle_click(square)
+                print(logic.check_check(poss_moves(board, pieces, False),k_w))
                 pro, pro_square = logic.check_promotion(board)
                 if pro:
                     board[pro_square] = 32 + turn

@@ -1,5 +1,6 @@
 from random import choice
 from piece_board import piece_board
+from logic import check_check, play_move, unplay_move
 
 Pawn = 2
 Pawnb = 3
@@ -225,32 +226,25 @@ def castle(king_square, color, side, board):
             return True, king_square - 2
     return False, king_square
 
-def check_castle(king_square, color, board, pieces):
-    castle_king = False
-    castle_queen = False
-    o = 0 if color else 1
-    if pieces[king_square].moved:
-        return False, False
-    for side in range(2):
-        if side == 0:
-            if board[king_square + 3] == 16 + o:
-                castle_king = True
-            for x in range(1, 3):
-                if board[king_square + x] != 0:
-                    castle_king = False
-                    break
-        else:
-            if board[king_square - 4] == 16 + o:
-                castle_queen = True
-            for x in range(1, 4):
-                if board[king_square - x] != 0:
-                    castle_queen = False
-                    break
-                
-    return castle_king, castle_queen
                     
     
+
+def check_less_moves(king_square, moves, board, color, pieces):
+    for o_space in moves:
+        for dest in moves[o_space]:
+            move = (o_space, dest)
+            play_move(move, board)
+            enemy_moves = poss_moves(board, pieces, not color)
+            if check_check(enemy_moves, king_square):
+                moves[o_space].remove(dest)
+            unplay_move(move, board)
+            return moves
                 
+            
+            
+    
+
+               
              
     
     
@@ -274,9 +268,11 @@ def poss_moves(board, pieces, color):
                 elif board[x] == 32+o:
                     moves[x] = get_straights(x)  +  get_diagonals(x)
                 elif board[x] == 64+o:
+                    king_square = x
                     moves[x] = king_moves(x) 
     legal = legal_move(moves, board, color)
-    return legal
+    f_legal = check_less_moves(king_square, legal, board, color, pieces)
+    return f_legal
 
 
 
