@@ -230,27 +230,25 @@ def castle(king_square, color, side, board):
     
 
 def check_less_moves(king_square, moves, board, color, pieces):
+    f_moves = []
     for o_space in moves:
+        f_moves.clear()
         for dest in moves[o_space]:
             move = (o_space, dest)
-            play_move(move, board)
+            cap = play_move(move, board)
             enemy_moves = poss_moves(board, pieces, not color)
+            # print(enemy_moves)
             if check_check(enemy_moves, king_square):
-                moves[o_space].remove(dest)
-            unplay_move(move, board)
-            return moves
+                unplay_move(move, board, cap)
+                continue
+            f_moves.append(dest)
+            unplay_move(move, board, cap)
+        moves[o_space] = f_moves.copy()
+    return moves
                 
-            
-            
-    
-
-               
-             
-    
-    
-    
 
 def poss_moves(board, pieces, color):
+    global king_square
     moves = {}
     o = 0 if color else 1
     for x in board:
@@ -271,8 +269,12 @@ def poss_moves(board, pieces, color):
                     king_square = x
                     moves[x] = king_moves(x) 
     legal = legal_move(moves, board, color)
-    f_legal = check_less_moves(king_square, legal, board, color, pieces)
-    return f_legal
+    return legal
+
+def final_moves(board, pieces, color):
+    moves = poss_moves(board, pieces, color)
+    print(king_square)
+    return check_less_moves(king_square, moves, board, color, pieces)
 
 
 

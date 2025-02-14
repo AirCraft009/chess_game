@@ -89,9 +89,13 @@ def render_pieces(pieces):
         pieces[piece].render()
         
 def play_move(move, board):
+    capt_piece = board[move[1]]
     board[move[1]] = board[move[0]]
     board[move[0]] = 0
+    return capt_piece
     
-def unplay_move(move, board):
+def unplay_move(move, board, capture = None):
     board[move[0]] = board[move[1]]
     board[move[1]] = 0
+    if capture != 0:
+        board[move[1]] = capture
