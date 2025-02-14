@@ -20,8 +20,14 @@ def update_pieces(board, pieces, pos_board):
         pieces[space].x = pos_board[space][0]
         pieces[space].y = pos_board[space][1]
         pieces[space].space = space
-        pieces[space].moved = True
         pieces[space].render()
+        
+def check_promotion(board):
+    for c in range(2):
+        for x in range(8):
+            if board[x + c*56] == 2 or board[x + c*56] == 3:
+                return True, x + c * 56
+    return False, None
 
 
 def select_square(square, poss_moves, pos_board, screen, k_w, pieces, board):

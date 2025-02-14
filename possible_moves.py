@@ -65,13 +65,13 @@ def knight_moves(space):
 def king_moves(space):
     king_moves = [
             (-9, space % 8 != 0 and space > 8),
-            (-8, space % 8 != 0 and space > 8),
-            (-7, space % 8 != 0 and space > 8),
-            (-1, space % 8 != 7 and space > 0),
-            (8, space % 8 != 7 and space < 56),
+            (-8,space > 8),
+            (-7, space % 8 != 7 and space > 8),
+            (-1, space % 8 != 0 and space > 0),
+            (8, space < 56),
             (9, space % 8 != 7 and space < 56),
             (7, space % 8 != 0 and space < 56),
-            (1, space % 8 != 0 and space < 63)
+            (1, space % 8 != 7 and space < 63)
     ]
     
     l1 = [space + move for move, condition in king_moves if condition]
@@ -88,7 +88,7 @@ def get_straights(space):
         for y in range(1, 9):
             if x == 0:
                 up = (space + offsets["up"]*y)
-                if up <= 56:
+                if up <= 63:
                     u.append(up)
             elif x == 1:
                 right = (space + offsets["right"]*y)
@@ -141,15 +141,30 @@ def get_diagonals(space):
                 
             
                  
-def get_pawns(space, pawn, color):
+def get_pawns(space, pawn, color, board):
+    o = 0 if color else 1
+
     pawn_moves = []
     if color:
-        if pawn.moved:
-            pawn_moves = [space + 8 if space < 56 else 0]
-        else:
-            pawn_moves = [space + 8 if space < 56 else 0, space + 16 if space < 48 else 0]
+        if space < 56:
+            if board[space + 8] != 0:
+                pawn_moves = []
+            else:
+                if pawn.moved:
+                    pawn_moves = [space + 8]
+                else:
+                    pawn_moves = [space + 8,space + 16 if space < 48 else 0]
+                    
+            if space%8 != 7 and board[space + 9] != 0:
+                pawn_moves.append(space + 9)
+            if space%8 != 0 and board[space + 7] != 0:
+                pawn_moves.append(space + 7)
+            
+
             
     else:
+        if board[space - 8] != 0:
+            return []
         if pawn.moved:
             pawn_moves = [space - 8 if space > 7 else 0]
         else:
@@ -248,7 +263,7 @@ def poss_moves(board, pieces, color):
         if board[x] != 0:
             if board[x] % 2 == o:
                 if board[x] == 2+o:
-                    moves[x] = get_pawns(x, pieces[x], color)
+                    moves[x] = get_pawns(x, pieces[x], color, board)
                     # pieces[x].moved = True
                 elif board[x] == 4+o:
                     moves[x] = knight_moves(x)
@@ -290,8 +305,9 @@ def generate_moves(board_pieces, board, depth):
 
                            
 if __name__ == "__main__":                        
-    print(get_diagonals(5))         
+    # print(get_diagonals(5))         
     # print(get_straights(57))        
     # print(get_pawns(57, False, False))
-    print(king_moves(28))
+    print(king_moves(31))
+    print(31%8)
     # print(knight_moves(1))

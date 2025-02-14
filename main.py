@@ -7,7 +7,7 @@ from possible_moves import poss_moves, castle, check_castle
 
 fen = "rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR"
 clicked = False
-turn = True
+turn = 0
 selected = None
 board, k_w, k_b = read_Fen(fen, {})
 pos_board = logic.init_posboard()
@@ -24,7 +24,7 @@ pieces = piece_board(board, pos_board, screen, images)
 print(check_castle(k_w, True, board, pieces))
 
 def handle_click(square):
-    global k_w, pieces
+    global k_w, pieces, turn
     if not clicked:
         logic.draw_board(screen)
         logic.render_pieces(pieces)
@@ -46,6 +46,7 @@ def handle_click(square):
             logic.draw_board(screen)
             logic.render_pieces(pieces)
             k_w = k_w + 2
+            turn = 0 if turn == 1 else 1
             return None, False
         if square == k_w_castle_q and cq:
             castle(k_w, True, 1, board)
@@ -54,6 +55,7 @@ def handle_click(square):
             logic.draw_board(screen)
             logic.render_pieces(pieces)
             k_w = k_w - 2
+            turn = 0 if turn == 1 else 1
             return None, False
           
     if square not in possible[selected]:
@@ -74,6 +76,7 @@ def handle_click(square):
     pieces.pop(selected)
     logic.draw_board(screen)
     logic.render_pieces(pieces)
+    turn = 0 if turn == 1 else 1
     return None, False
 
 logic.draw_board(screen)
@@ -87,15 +90,26 @@ while True:
             quit()
             
         if event.type == pygame.MOUSEBUTTONDOWN:
-            # logic.draw_board(screen)
-            # logic.render_pieces(pieces)
-            pos = pygame.mouse.get_pos()
-            posx = pos[0] // 100
-            posy = 7 - pos[1] // 100
-            square = posx + posy * 8
-            print(square)
-            selected, clicked = handle_click(square)
-            possible = poss_moves(board, pieces, True)
+            if turn == 0:
+                # logic.draw_board(screen)
+                # logic.render_pieces(pieces)
+                pos = pygame.mouse.get_pos()
+                posx = pos[0] // 100
+                posy = 7 - pos[1] // 100
+                square = posx + posy * 8
+                # print(square)
+                selected, clicked = handle_click(square)
+                pro, pro_square = logic.check_promotion(board)
+                if pro:
+                    board[pro_square] = 32 + turn
+                    pieces = piece_board(board, pos_board, screen, images)
+                    logic.draw_board(screen)
+                    logic.render_pieces(pieces)
+                possible = poss_moves(board, pieces, True)
+                
             
+            
+            
+
     
     pygame.display.flip()
