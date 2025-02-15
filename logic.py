@@ -1,5 +1,20 @@
 import pygame
 
+piece_value = {
+    2: 1,
+    3: 1,
+    4: 3,
+    5: 3,
+    8: 3,
+    9: 3,
+    16: 5,
+    17: 5,
+    32: 9,
+    33: 9,
+    64: 18,
+    65: 18
+}
+
 def draw_board(screen):
     for y in range(8):
         for x in range(8):
@@ -94,8 +109,32 @@ def play_move(move, board):
     board[move[0]] = 0
     return capt_piece
     
-def unplay_move(move, board, capture = None):
+def unplay_move(move, board, capture = 0):
     board[move[0]] = board[move[1]]
     board[move[1]] = 0
     if capture != 0:
         board[move[1]] = capture
+        
+def play_move_piece(move, board, pieces, pos_board):
+    capt_piece = board[move[1]]
+    pieces[move[0]].x = pos_board[move[1]][0]
+    pieces[move[0]].y = pos_board[move[1]][1]
+    pieces[move[0]].space = move[1]
+    pieces[move[0]].moved = True
+    pieces[move[1]] = pieces[move[0]]
+    pieces.pop(move[0])
+    board[move[1]] = board[move[0]]
+    board[move[0]] = 0
+    return capt_piece
+        
+def calc_material(board):
+    white_mat = 0
+    black_mat = 0
+    for space in board:
+        if board[space] == 0:
+            continue
+        if board[space]%2 == 0:
+            white_mat += piece_value[board[space]]
+        else:
+            black_mat += piece_value[board[space]]
+    return white_mat, black_mat

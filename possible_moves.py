@@ -147,29 +147,44 @@ def get_pawns(space, pawn, color, board):
 
     pawn_moves = []
     if color:
-        if space < 56:
-            if board[space + 8] != 0:
-                pawn_moves = []
+        if space > 56:
+            return []
+        if board[space + 8] != 0:
+            pawn_moves = []
+        else:
+            if pawn.moved:
+                pawn_moves = [space + 8]
             else:
-                if pawn.moved:
+                if board[space + 16] != 0:
                     pawn_moves = [space + 8]
                 else:
-                    pawn_moves = [space + 8,space + 16 if space < 48 else 0]
-                    
-            if space%8 != 7 and board[space + 9] != 0:
-                pawn_moves.append(space + 9)
-            if space%8 != 0 and board[space + 7] != 0:
-                pawn_moves.append(space + 7)
+                    pawn_moves = [space + 8,space + 16 if space < 56 else 0]
+                
+        if space%8 != 7 and board[space + 9] != 0:
+            pawn_moves.append(space + 9)
+        if space%8 != 0 and board[space + 7] != 0:
+            pawn_moves.append(space + 7)
             
 
             
     else:
-        if board[space - 8] != 0:
+        if space < 8:
             return []
-        if pawn.moved:
-            pawn_moves = [space - 8 if space > 7 else 0]
+        if board[space - 8] != 0:
+            pawn_moves = []
         else:
-            pawn_moves = [space - 8 if space > 7 else 0, space - 16 if space > 15 else 0]
+            if pawn.moved:
+                pawn_moves = [space - 8 if space > 7 else 0]
+            else:
+                if board[space - 16] != 0:
+                    pawn_moves = [space - 8 if space > 7 else 0]
+                else:
+                    pawn_moves = [space - 8 if space > 7 else 0, space - 16 if space > 15 else 0]
+                    
+        if space%8 != 0 and board[space - 9] != 0:
+            pawn_moves.append(space - 9)
+        if space%8 != 7 and board[space - 7] != 0:
+            pawn_moves.append(space - 7)
     # print(pawn_moves)
     return [[x] for x in pawn_moves]
                 
@@ -230,10 +245,14 @@ def castle(king_square, color, side, board):
     
 
 def check_less_moves(king_square, moves, board, color, pieces):
+    global real_king 
+    real_king = king_square
     f_moves = []
     for o_space in moves:
         f_moves.clear()
         for dest in moves[o_space]:
+            if o_space == real_king:
+                king_square = dest
             move = (o_space, dest)
             cap = play_move(move, board)
             enemy_moves = poss_moves(board, pieces, not color)
@@ -243,6 +262,7 @@ def check_less_moves(king_square, moves, board, color, pieces):
                 continue
             f_moves.append(dest)
             unplay_move(move, board, cap)
+            king_square = real_king
         moves[o_space] = f_moves.copy()
     return moves
                 
