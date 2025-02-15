@@ -29,12 +29,13 @@ def init_posboard():
 
 def update_pieces(board, pieces, pos_board):
     for space in range(64):
-        if board[space] == 0:
+        if board[space] == 0 and space not in pieces:
             continue
         pieces[space].x = pos_board[space][0]
         pieces[space].y = pos_board[space][1]
         pieces[space].space = space
         pieces[space].render()
+        pieces
         
 def check_promotion(board):
     for c in range(2):
@@ -126,6 +127,30 @@ def play_move_piece(move, board, pieces, pos_board):
     board[move[1]] = board[move[0]]
     board[move[0]] = 0
     return capt_piece
+
+def unplay_move_piece(move, board,  pieces, pos_board, capture = 0):
+    board[move[0]] = board[move[1]]
+    board[move[1]] = 0
+    piece_start = pieces[move[0]]
+    if capture != 0:
+        board[move[1]] = capture
+        piece_end = pieces[move[1]]
+        pieces[move[1]] = piece_start
+        pieces[move[0]] = piece_end
+        pieces[move[0]].x = pos_board[move[0]][0]
+        pieces[move[0]].y = pos_board[move[0]][1]
+        pieces[move[0]].space = move[0]
+        pieces[move[0]].moved = True
+    else:
+        pieces[move[1]] = pieces[move[0]]
+        pieces.pop(move[0])
+        
+    pieces[move[1]].x = pos_board[move[1]][0]
+    pieces[move[1]].y = pos_board[move[1]][1]
+    pieces[move[1]].space = move[1]
+    pieces[move[1]].moved = True
+        
+    
         
 def calc_material(board):
     white_mat = 0

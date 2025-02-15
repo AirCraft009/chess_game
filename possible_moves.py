@@ -179,7 +179,7 @@ def get_pawns(space, pawn, color, board):
                 if board[space - 16] != 0:
                     pawn_moves = [space - 8 if space > 7 else 0]
                 else:
-                    pawn_moves = [space - 8 if space > 7 else 0, space - 16 if space > 15 else 0]
+                    pawn_moves = [space - 8 if space >= 7 else 0, space - 16 if space > 15 else 0]
                     
         if space%8 != 0 and board[space - 9] != 0:
             pawn_moves.append(space - 9)
@@ -258,6 +258,7 @@ def check_less_moves(king_square, moves, board, color, pieces):
             enemy_moves = poss_moves(board, pieces, not color)
             # print(enemy_moves)
             if check_check(enemy_moves, king_square):
+                king_square = real_king
                 unplay_move(move, board, cap)
                 continue
             f_moves.append(dest)
@@ -326,6 +327,7 @@ if __name__ == "__main__":
     # print(get_diagonals(5))         
     # print(get_straights(57))        
     # print(get_pawns(57, False, False))
-    print(king_moves(31))
-    print(31%8)
+    # print(king_moves(31))
+    # print(31%8)
     # print(knight_moves(1))
+    print(get_diagonals(53) + get_straights(53))

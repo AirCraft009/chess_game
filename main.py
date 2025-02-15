@@ -4,9 +4,9 @@ import init_image
 from fen_read import read_Fen
 from piece_board import piece_board
 from possible_moves import poss_moves, castle, final_moves
-from evalution import calc_moves_ahead
+from evalution import calc_moves_ahead, read_position
 
-fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR"
+fen = "rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR"
 clicked = False
 turn = 0
 selected = None
@@ -57,6 +57,7 @@ def handle_click(square):
             logic.draw_board(screen)
             logic.render_pieces(pieces)
             k_w = k_w - 2
+            pieces[k_w].moved = True
             turn = 1
             return None, False
           
@@ -91,38 +92,62 @@ possible = final_moves(board, pieces, True)
 
 
 while True:
+    if not possible:
+        print("you lost")
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
             
         if event.type == pygame.MOUSEBUTTONDOWN:
-            print(logic.check_check(poss_moves(board, pieces, False),k_w))
-            # print(poss_moves(board, pieces, False))
-            # logic.draw_board(screen)
-            # logic.render_pieces(pieces)
-            pos = pygame.mouse.get_pos()
-            posx = pos[0] // 100
-            posy = 7 - pos[1] // 100
-            square = posx + posy * 8
-            # print(square)
-            selected, clicked = handle_click(square)
-            pro, pro_square = logic.check_promotion(board)
-            pos = poss_moves(board, pieces, False)
-            if pro:
-                board[pro_square] = 32
-                pieces = piece_board(board, pos_board, screen, images)
-                logic.draw_board(screen)
-                logic.render_pieces(pieces)
+            if turn == 0:
+
+                
+                # print(poss_moves(board, pieces, False))
+                # logic.draw_board(screen)
+                # logic.render_pieces(pieces)
+                pos = pygame.mouse.get_pos()
+                posx = pos[0] // 100
+                posy = 7 - pos[1] // 100
+                square = posx + posy * 8
+                # print(square)
+                selected, clicked = handle_click(square)
+                pro, pro_square = logic.check_promotion(board)
+                if pro:
+                    board[pro_square] = 32 + turn
+                    pieces = piece_board(board, pos_board, screen, images)
+                    logic.draw_board(screen)
+                    logic.render_pieces(pieces)
 
             if turn == 1:
+                print(logic.check_check(final_moves(board, pieces, False),k_b))
                 move = calc_moves_ahead(1, board, turn, False, pieces)
-                logic.play_move_piece(move, board, pieces, pos_board)
-                logic.draw_board(screen)
-                logic.render_pieces(pieces)
-                turn = 0
-                logic.select_square(49, possible, pos_board, screen, k_w, pieces, board)
-            
+                # print(read_position(1, board, turn, False, pieces, pos_board))
+                logic.update_pieces(board, pieces, pos_board)
+                if move == None:
+                    print("checkmate")
+                    screen.fill("white")
+                    screen.blit(images[12], (100,100))
+                    while True:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                pygame.quit()
+                                quit()
+                        pygame.display.flip()
+                else:
+                    logic.play_move_piece(move, board, pieces, pos_board)
+                    logic.draw_board(screen)
+                    logic.render_pieces(pieces)
+                    pro, pro_square = logic.check_promotion(board)
+                    if pro:
+                        board[pro_square] = 32 + turn
+                        pieces = piece_board(board, pos_board, screen, images)
+                        logic.draw_board(screen)
+                        logic.render_pieces(pieces)
+                    turn = 0
+
+                    # logic.select_square(49, possible, pos_board, screen, k_w, pieces, board)
+                
             possible = final_moves(board, pieces, True)
                 
             
