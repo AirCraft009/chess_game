@@ -118,6 +118,10 @@ def unplay_move(move, board, capture = 0):
         
 def play_move_piece(move, board, pieces, pos_board):
     capt_piece = board[move[1]]
+    if capt_piece != 0:
+        cap = pieces.pop(move[1])
+    else:
+        cap = None
     pieces[move[0]].x = pos_board[move[1]][0]
     pieces[move[0]].y = pos_board[move[1]][1]
     pieces[move[0]].space = move[1]
@@ -126,30 +130,31 @@ def play_move_piece(move, board, pieces, pos_board):
     pieces.pop(move[0])
     board[move[1]] = board[move[0]]
     board[move[0]] = 0
-    return capt_piece
+    return capt_piece, cap
 
-def unplay_move_piece(move, board,  pieces, pos_board, capture = 0):
-    board[move[0]] = board[move[1]]
-    board[move[1]] = 0
-    piece_start = pieces[move[0]]
+def unplay_move_piece(move, board,  pieces, pos_board, capture = 0, cap = None):
+
+    piece_start = pieces[move[1]]
     if capture != 0:
+        print(f"unplaying capture of {capture}")
         board[move[1]] = capture
-        piece_end = pieces[move[1]]
-        pieces[move[1]] = piece_start
-        pieces[move[0]] = piece_end
-        pieces[move[0]].x = pos_board[move[0]][0]
-        pieces[move[0]].y = pos_board[move[0]][1]
-        pieces[move[0]].space = move[0]
-        pieces[move[0]].moved = True
+        pieces[move[0]] = piece_start
+        pieces[move[1]] = cap
+        pieces[move[1]].x = pos_board[move[1]][0]
+        pieces[move[1]].y = pos_board[move[1]][1]
+        pieces[move[1]].space = move[1]
+        pieces[move[1]].moved = True
     else:
-        pieces[move[1]] = pieces[move[0]]
-        pieces.pop(move[0])
+        pieces[move[0]] = pieces[move[1]]
+        pieces.pop(move[1])
         
-    pieces[move[1]].x = pos_board[move[1]][0]
-    pieces[move[1]].y = pos_board[move[1]][1]
-    pieces[move[1]].space = move[1]
-    pieces[move[1]].moved = True
-        
+    pieces[move[0]].x = pos_board[move[1]][0]
+    pieces[move[0]].y = pos_board[move[1]][1]
+    pieces[move[0]].space = move[0]
+    pieces[move[0]].moved = True
+    board[move[0]] = board[move[1]]
+    board[move[1]] = 0 
+    pygame.display.flip()   
     
         
 def calc_material(board):

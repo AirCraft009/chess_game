@@ -292,12 +292,76 @@ def poss_moves(board, pieces, color):
     legal = legal_move(moves, board, color)
     return legal
 
+
+def poss_moves_evaluation(board, color):
+    global king_square
+    moves = {}
+    o = 0 if color else 1
+    for x in board:
+        if board[x] != 0:
+            if board[x] % 2 == o:
+                if board[x] == 2+o:
+                    moves[x] = get_pawns_eval(x, color, board)
+                    # pieces[x].moved = True
+                elif board[x] == 4+o:
+                    moves[x] = knight_moves(x)
+                elif board[x] == 8+o:
+                    moves[x] = get_diagonals(x)
+                elif board[x] == 16+o:
+                    moves[x] = get_straights(x)
+                elif board[x] == 32+o:
+                    moves[x] = get_straights(x)  +  get_diagonals(x)
+                elif board[x] == 64+o:
+                    king_square = x
+                    moves[x] = king_moves(x) 
+    legal = legal_move(moves, board, color)
+    return legal
+
+
+
+def get_pawns_eval(space, color, board):
+    o = 0 if color else 1
+
+    pawn_moves = []
+    if color:
+        if space >= 56:
+            return []      
+        if space%8 != 7 and board[space + 9] != 0:
+            pawn_moves.append(space + 9)
+        if space%8 != 0 and board[space + 7] != 0:
+            pawn_moves.append(space + 7)
+    else:  
+        if space <= 7:
+            return []          
+        if space%8 != 0 and board[space - 9] != 0:
+            pawn_moves.append(space - 9)
+        if space%8 != 7 and board[space - 7] != 0:
+            pawn_moves.append(space - 7)
+    # print(pawn_moves)
+    return [[x] for x in pawn_moves]
+
+
+
 def final_moves(board, pieces, color):
     moves = poss_moves(board, pieces, color)
     print(king_square)
     return check_less_moves(king_square, moves, board, color, pieces)
 
+def defending(moves, board, color):
+    under_moves = []
+    # print(moves)
+    o = 0 if color else 1
+    for direction in moves:
+        for move in direction:
+            if board[move] == 0:
+                continue
+            elif board[move] % 2 == o:
+                under_moves.append(move)
+                break	
+            else:
+                break
 
+    return under_moves
 
 """
 def generate_moves(board_pieces, board, depth):
@@ -330,4 +394,4 @@ if __name__ == "__main__":
     # print(king_moves(31))
     # print(31%8)
     # print(knight_moves(1))
-    print(get_diagonals(53) + get_straights(53))
+    print([get_diagonals(53) + get_straights(53)])
