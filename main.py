@@ -114,7 +114,7 @@ while True:
                 selected, clicked = handle_click(square)
                 pro, pro_square = logic.check_promotion(board)
                 if pro:
-                    board[pro_square] = 32 + turn
+                    board[pro_square] = 33 - turn
                     pieces = piece_board(board, pos_board, screen, images)
                     logic.draw_board(screen)
                     logic.render_pieces(pieces)

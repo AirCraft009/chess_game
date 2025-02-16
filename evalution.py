@@ -1,6 +1,7 @@
 from possible_moves import final_moves
-from logic import play_move, play_move_piece, unplay_move, calc_material, update_pieces
+from logic import play_move, play_move_piece, unplay_move, calc_material, update_pieces, unplay_move_piece
 from search_tree import Node, Tree
+import random
 
 def eval_pos(material: tuple):
     white_mat = material[0]
@@ -24,15 +25,38 @@ def calc_moves_ahead(depth, board, turn, color, pieces):
             mat_after_move[move] = calc_material(board)
             unplay_move(move, board, cap)
     best_eval = 0
+    equal_possess = []
     # print(mat_after_move)
     for move in mat_after_move:
         white, black = eval_pos(mat_after_move[move])
         if black > best_eval:
             best_eval = black
             best_move = move
+        elif black == best_eval:
+            equal_possess.append(move)
+    if len(equal_possess) > 1:
+        rand_move = random.choice(equal_possess)
+        if mat_after_move[rand_move] == mat_after_move[best_move]:
+            best_move = rand_move
     return best_move
 
-def 3_moves_ahead(depth, board, turn, color, pieces):
+def eval_all_moves(board, color, pieces, pos_board):
+    eval_after_move = {}
+    possible = final_moves(board, pieces, color)
+    for o_space in possible:
+        for dest in possible[o_space]:
+            move = (o_space, dest)
+            cap = play_move_piece(move, board, pieces, pos_board)
+            evaluation = eval_pos(calc_material(board))
+            unplay_move_piece(move, board, pieces, pos_board, cap)
+            eval_after_move[move] = evaluation
+    return eval_after_move
+
+def analyze(board, turn, color, pieces, pos_board):
+    eval_after_move = eval_all_moves(board, color, pieces, pos_board)
+    
+
+            
 
     
         
