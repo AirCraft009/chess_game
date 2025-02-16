@@ -176,7 +176,7 @@ def get_pawns(space, pawn, color, board):
             if pawn.moved:
                 pawn_moves = [space - 8 if space > 7 else 0]
             else:
-                if board[space - 16] != 0:
+                if space > 15 and  board[space - 16] != 0:
                     pawn_moves = [space - 8 if space > 7 else 0]
                 else:
                     pawn_moves = [space - 8 if space >= 7 else 0, space - 16 if space > 15 else 0]
@@ -266,7 +266,35 @@ def check_less_moves(king_square, moves, board, color, pieces):
             king_square = real_king
         moves[o_space] = f_moves.copy()
     return moves
-                
+
+def only_def(board, color, pieces):
+    global king_square
+    moves = {}
+    o = 0 if color else 1
+    for x in board:
+        if board[x] != 0:
+            if board[x] % 2 == o:
+                if board[x] == 2+o:
+                    moves[x] = get_pawns_eval(x, color, board)
+                    # pieces[x].moved = True
+                elif board[x] == 4+o:
+                    moves[x] = knight_moves(x)
+                elif board[x] == 8+o:
+                    moves[x] = get_diagonals(x)
+                elif board[x] == 16+o:
+                    moves[x] = get_straights(x)
+                elif board[x] == 32+o:
+                    moves[x] = get_straights(x)  +  get_diagonals(x)
+                elif board[x] == 64+o:
+                    king_square = x
+                    moves[x] = king_moves(x) 
+    defense = []          
+    for piece in pieces:
+        for dir in moves[piece]:
+            one_piece = defending([dir], board, color)
+            defense.append(x for x in one_piece)
+        
+    return defense        
 
 def poss_moves(board, pieces, color):
     global king_square

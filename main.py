@@ -120,7 +120,7 @@ while True:
                     logic.render_pieces(pieces)
 
             if turn == 1:
-                print(logic.check_check(final_moves(board, pieces, False),k_b))
+                # print(logic.check_check(final_moves(board, pieces, False),k_b))
                 move = calc_moves_ahead(1, board, turn, False, pieces)
                 # print(read_position(1, board, turn, False, pieces, pos_board))
                 logic.update_pieces(board, pieces, pos_board)
