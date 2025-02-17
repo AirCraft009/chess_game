@@ -38,6 +38,7 @@ def eval_pos(material: tuple, num_pieces, board, pieces, move, cap = 0):
     for origin in attack:
         for dest in attack:
             targets.append(dest)
+    enemy_defend = only_def(board, True, white_pieces)
         
     if num_pieces > 16:
 
@@ -51,10 +52,10 @@ def eval_pos(material: tuple, num_pieces, board, pieces, move, cap = 0):
                 eval_black -= 5 if distance_left != 0 or distance_left[piece] != 7 else 0
             elif black_pieces[piece] == 5:
                 eval_black += 6 if distance_bottom[center] +3 > distance_bottom[piece] else -6
-                eval_black += 4 if distance_left != 0 and distance_left[piece] != 7 else -19
+                eval_black += 4 if distance_left != 0 and distance_left[piece] != 7 else -25
             elif black_pieces[piece] == 3:
-                eval_black += 3 if distance_bottom[center] > distance_bottom[piece] and distance_left[piece] > 3 and distance_right[piece] > 3 else -3
-                eval_black += 8 if distance_bottom[center] +2 > distance_bottom[piece] and distance_left[piece] >= 3 and distance_left[piece]< 5 else -1.3
+                eval_black += 7 if distance_bottom[center] > distance_bottom[piece] and distance_left[piece] > 3 and distance_right[piece] > 3 else -3
+                eval_black += 10 if distance_bottom[center] +2 > distance_bottom[piece] and distance_left[piece] >= 3 and distance_left[piece]< 5 else -1.3
                 eval_black -= (piece_value[board[move[1]]] - piece_value[cap])*0.3 if distance_bottom[center] +3 < distance_bottom[piece] else +0.2
                 if distance_left[piece] != 0 and distance_right[piece] != 0:
                     eval_black += 5 if board[piece +7] == 3 or board[piece + 9 ] == 3 else - 2
@@ -70,39 +71,55 @@ def eval_pos(material: tuple, num_pieces, board, pieces, move, cap = 0):
             eval_black += 3 if distance_bottom[center] +2 > distance_bottom[piece] else -2
             eval_black -= 2 if distance_bottom[piece] == 8 else - 4
             eval_black -= piece_value[board[piece]]*7 if piece in enemy_targets else - 2
-            eval_black += 1.5 * len(attack)
+            for att in attack:
+                eval_black += 1.5 * piece_value[board[att]]
                 
-    elif num_pieces > 4 and white_mat-black_mat < -7:
+    elif num_pieces > 7:
         pawns = []
         for piece in black_pieces:
             if board[piece] == 3:
                 pawns.append(piece)
                 eval_black += distance_top[piece]*3 if piece not in enemy_targets or piece in defend else -4
-                if distance_right[piece] != 0:
+                if distance_right[piece] != 0 and piece > 7:
                     eval_black += 4 if board[piece +7]%2 == 1 or board[piece + 9 ]%2 == 1 else - 2
-                if distance_left[piece] != 0:
+                if distance_left[piece] != 0 and piece > 7:
                     eval_black += 4 if distance_left[piece] != 0 and board[piece - 7]%2 == 1 or board[piece - 9]%2 == 1 else -0.4
                 eval_black += 20 if distance_bottom[piece] == 0 and piece not in enemy_targets or piece in defend else -9
             if board[piece] == 65:
                 
                 for defended in defending(king_moves(piece), board, False):
                     eval_black += 0.6* piece_value[board[defended]] 
-                    
-                k_d = distance_clust(pawns, k_b)
-                eval_black -= 0.6*k_d
         for defended in defend:
             eval_black += 1.2
         for att in attack:
             eval_black += 0.7 * piece_value[board[att]]
             
-        else:
-            eval_black += 1.7 * 8 - find_least(distance_bottom[k_w], distance_left[k_w], distance_top[k_w], distance_right )
-            eval_black += 3 if k_w in attack else 0
-            eval_black -= 7 if k_b in enemy_targets else -2
-            
-            
+    else:
+        real_king_moves = []
+        for direction in king_moves(k_w):
+            for lachs in direction:
+                if lachs not in targets:
+                    real_king_moves.append(lachs)
+        print("------------------------------------------------")
+        print(move)
+        print(real_king_moves)
+        print(targets)
         
-        
+        eval_black += 9 if k_w in attack else 0
+        eval_black -= 7 if k_b in enemy_targets else -2
+        for piece in board:
+            if board[piece]%2 == 1:
+                eval_black -= 2000 if piece in enemy_targets and piece not in defend else -20
+        for att in targets:
+            eval_black += piece_value[board[att]]
+        if move[1] not in enemy_targets or move[1] in defend:
+            eval_black += 50000000 * (8- len(real_king_moves) if len(real_king_moves) > 0 else 40)
+        if len(real_king_moves) == 0 and k_w in targets and (move[1] not in enemy_targets or move[1] in defend):
+            eval_black += inf
+        if cap != 0:
+            # print(cap)
+            eval_black += piece_value[cap]*2 * (piece_value[cap]/piece_value[board[move[1]]]) if move[1] in enemy_targets else 5
+            
         
         
 
@@ -113,14 +130,12 @@ def eval_pos(material: tuple, num_pieces, board, pieces, move, cap = 0):
             else: 
                 eval_black -=(piece_value[board[move[1]]]-piece_value[cap]) * 20 + 2
         else: 
-            eval_black += (piece_value[cap])*100
+            eval_black += (piece_value[cap])*26
     else:
         eval_black -= piece_value[board[move[1]]]*10 if move[1] in enemy_targets else - 3
         eval_black -= piece_value[board[move[1]]]*12 if move[1] in enemy_targets and board[move[1]] in defend else - 3
-        
-        
-            
-    print(eval_black)
+    
+    print(eval_black)    
     return eval_white, eval_black
 
 def find_origin(dict, list):
@@ -129,14 +144,6 @@ def find_origin(dict, list):
             if list[i] == dest:
                 return orin
             
-def distance_clust(pawns, pos):
-    cluster = []
-    prev_pawn = pawns[0]
-    for x in range(1, len(pawns)):
-        if abs(prev_pawn - pawns[x]) < 9 and prev_pawn//8 != pawns[x]//8:
-            distance = prev_pawn // 8 - pos //8 
-            return distance   
-    return 0    
 def find_least(a, b, c, d):
     l = [a,b,c,d]
     least = 8
@@ -172,9 +179,11 @@ def calc_moves_ahead(depth, board, turn, color, pieces):
             equal_possess.append(move)
     if len(equal_possess) > 1:
         rand_move = random.choice(equal_possess)
-        if round(eval_after_move[rand_move], 3) == round(eval_after_move[best_move], 3):
+        if best_move == None:
             best_move = rand_move
-
+        elif round(eval_after_move[rand_move], 3) == round(eval_after_move[best_move], 3):
+            best_move = rand_move
+    print(eval_after_move[best_move])
     return best_move
 
 def eval_all_moves(board, color, pieces, pos_board):

@@ -372,7 +372,7 @@ def get_pawns_eval(space, color, board):
 
 def final_moves(board, pieces, color):
     moves = poss_moves(board, pieces, color)
-    print(king_square)
+    # print(king_square)
     return check_less_moves(king_square, moves, board, color, pieces)
 
 def defending(moves, board, color):

@@ -6,7 +6,7 @@ from piece_board import piece_board
 from possible_moves import poss_moves, castle, final_moves
 from evalution import calc_moves_ahead, read_position
 
-fen = "rnbkqbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBKQBNR"
+fen = "r1bk3r/8/8/8/8/3PK2P/P6P/8"
 clicked = False
 turn = 0
 selected = None
@@ -26,7 +26,7 @@ pieces = piece_board(board, pos_board, screen, images)
 
 def handle_click(square):
     global k_w, pieces, turn
-    print(selected)
+    # print(selected)
     if not clicked:
         logic.draw_board(screen)
         logic.render_pieces(pieces)
